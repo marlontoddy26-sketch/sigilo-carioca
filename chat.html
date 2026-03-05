@@ -1,117 +1,24 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Sigilo Carioca • Chat</title>
-  <link rel="stylesheet" href="styles.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chat • Sigilo Carioca</title>
+<link rel="stylesheet" href="estilos.css">
 </head>
+
 <body>
-  <div class="container">
-    <div class="nav">
-      <div class="brand">
-        <b>Sigilo Carioca</b>
-        <span id="title">Chat</span>
-      </div>
-      <span class="badge" id="limit">Grátis: 5 msgs/dia</span>
-    </div>
 
-    <div class="card">
-      <p class="h1" id="chatWith">Conversando…</p>
-      <p class="p">Fase de teste (sem banco). Já simula o limite grátis.</p>
-      <hr/>
+<h1>Chat</h1>
 
-      <div id="box" style="height:360px;overflow:auto;padding:12px;border-radius:14px;border:1px solid var(--stroke);background:#0b1220;display:flex;flex-direction:column;gap:10px"></div>
+<div class="chat-box" id="chat"></div>
 
-      <div class="row" style="margin-top:12px">
-        <input id="text" class="input" placeholder="Digite sua mensagem…"/>
-        <button class="btn primary" id="send">Enviar</button>
-      </div>
+<input id="msg" placeholder="Digite sua mensagem">
 
-      <div id="notice" class="p" style="margin-top:10px"></div>
+<button onclick="enviar()">Enviar</button>
 
-      <div class="row" style="margin-top:10px">
-        <a class="btn" href="home.html">Voltar</a>
-        <button class="btn" id="buy">Comprar fichas / VIP</button>
-      </div>
-    </div>
-  </div>
+<script src="app.js"></script>
 
-  <script>
-    const params = new URLSearchParams(location.search);
-    const nick = params.get("nick") || "Usuário";
-    document.getElementById("title").textContent = `Chat com ${nick}`;
-    document.getElementById("chatWith").textContent = `Chat com ${nick}`;
-
-    const box = document.getElementById("box");
-    const text = document.getElementById("text");
-    const send = document.getElementById("send");
-    const notice = document.getElementById("notice");
-    const limit = document.getElementById("limit");
-    const buy = document.getElementById("buy");
-
-    // ======= LIMITADOR SIMPLES (por dia) =======
-    const key = "sigilo_msg_count_" + new Date().toISOString().slice(0,10);
-    let count = Number(localStorage.getItem(key) || 0);
-
-    function updateUI(){
-      const left = Math.max(0, 5 - count);
-      limit.textContent = `Grátis hoje: ${left} msgs`;
-      if(left === 0){
-        notice.innerHTML = `Você atingiu o limite grátis. <b>Compre fichas</b> ou <b>VIP</b> para continuar.`;
-      }else{
-        notice.textContent = "";
-      }
-    }
-
-    function addMsg(who, message, me=false){
-      const div = document.createElement("div");
-      div.style.maxWidth = "75%";
-      div.style.padding = "10px 12px";
-      div.style.borderRadius = "14px";
-      div.style.border = "1px solid var(--stroke)";
-      div.style.background = me ? "rgba(34,197,94,.12)" : "#0f172a";
-      div.style.borderColor = me ? "rgba(34,197,94,.35)" : "var(--stroke)";
-      if(me) div.style.marginLeft = "auto";
-      div.innerHTML = `${message}<div style="color:var(--muted);font-size:11px;margin-top:4px">${who}</div>`;
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
-    }
-
-    // Mensagem inicial
-    addMsg(nick, "Oi! Vi seu anúncio. Tudo bem? 🙂", false);
-
-    send.addEventListener("click", ()=>{
-      const msg = text.value.trim();
-      if(!msg) return;
-
-      const left = 5 - count;
-      if(left <= 0){
-        updateUI();
-        alert("Limite grátis atingido. Compre fichas/VIP.");
-        return;
-      }
-
-      count += 1;
-      localStorage.setItem(key, String(count));
-
-      addMsg("Você", msg, true);
-      text.value = "";
-
-      // Resposta simulada
-      setTimeout(()=> addMsg(nick, "Entendi 😄 me conta mais…", false), 700);
-      updateUI();
-    });
-
-    text.addEventListener("keydown", (e)=>{
-      if(e.key === "Enter") send.click();
-    });
-
-    buy.addEventListener("click", ()=>{
-      alert("Pagamento entra na próxima etapa. Vamos ligar Mercado Pago / Pix quando conectar o Firebase.");
-    });
-
-    updateUI();
-  </script>
 </body>
 </html>
