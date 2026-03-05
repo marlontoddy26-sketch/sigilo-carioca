@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Sigilo Carioca • Anúncios</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">
+        <b>Sigilo Carioca</b>
+        <span>Anúncios diretos no RJ • Discreto • Local</span>
+      </div>
+      <span class="badge">Grátis: 5 msgs/dia</span>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <select id="filterCity" class="input">
+          <option value="">Todas as cidades</option>
+          <option>Rio de Janeiro</option>
+          <option>São Gonçalo</option>
+          <option>Niterói</option>
+          <option>Duque de Caxias</option>
+          <option>Nova Iguaçu</option>
+          <option>São João de Meriti</option>
+          <option>Itaboraí</option>
+          <option>Nilópolis</option>
+          <option>Magé</option>
+          <option>Região dos Lagos</option>
+        </select>
+
+        <select id="filterGoal" class="input">
+          <option value="">O que procura (tudo)</option>
+          <option>Encontro casual</option>
+          <option>Amizade</option>
+          <option>Relacionamento</option>
+          <option>Sigilo total</option>
+        </select>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <input id="search" class="input" placeholder="Pesquisar (ex: praia, motel, discreto, 28…)"/>
+        <button class="btn primary" id="btnPost">Publicar anúncio</button>
+      </div>
+
+      <p class="p" style="margin-top:10px">
+        Dica: comece focando em 1 cidade (ex: São Gonçalo) para o site parecer sempre ativo.
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="row" style="align-items:center">
+        <div>
+          <p class="h1">Anúncios recentes</p>
+          <p class="p">Clique em “Chamar” para abrir a conversa.</p>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <a class="btn" href="login.html" style="max-width:220px">Entrar / Criar conta</a>
+        </div>
+      </div>
+
+      <hr/>
+
+      <div id="list" style="display:flex;flex-direction:column;gap:10px"></div>
+
+      <p class="p" style="margin-top:12px">
+        * Nesta fase os anúncios são exemplos (sem banco). Depois ligamos Firebase e fica real.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // ======== EXEMPLOS (depois vira banco de dados) ========
+    const ads = [
+      { nick:"Carioca_29", age:29, city:"Rio de Janeiro", goal:"Encontro casual", text:"Discreta, curto praia e conversa boa. Procuro alguém sem enrolação.", tags:["discreto","praia"] },
+      { nick:"SG_35", age:35, city:"São Gonçalo", goal:"Sigilo total", text:"Trabalho muito, busco algo sigiloso e respeitoso. Sem exposição.", tags:["sigilo","respeito"] },
+      { nick:"Niteroi_24", age:24, city:"Niterói", goal:"Amizade", text:"Novata na cidade, quero conhecer lugares e pessoas legais primeiro.", tags:["amizade","rolê"] },
+      { nick:"Baixada_31", age:31, city:"Nova Iguaçu", goal:"Relacionamento", text:"Quero algo sério, com diálogo e parceria. Sem joguinhos.", tags:["sério","parceria"] },
+      { nick:"Lagos_28", age:28, city:"Região dos Lagos", goal:"Encontro casual", text:"Fim de semana na praia, bora marcar algo leve e gostoso.", tags:["praia","fimdesemana"] },
+    ];
+
+    const list = document.getElementById("list");
+    const filterCity = document.getElementById("filterCity");
+    const filterGoal = document.getElementById("filterGoal");
+    const search = document.getElementById("search");
+    const btnPost = document.getElementById("btnPost");
+
+    function render(){
+      const c = filterCity.value;
+      const g = filterGoal.value;
+      const s = (search.value || "").toLowerCase().trim();
+
+      list.innerHTML = "";
+
+      const filtered = ads.filter(a=>{
+        if(c && a.city !== c) return false;
+        if(g && a.goal !== g) return false;
+        if(s){
+          const hay = `${a.nick} ${a.age} ${a.city} ${a.goal} ${a.text} ${(a.tags||[]).join(" ")}`.toLowerCase();
+          if(!hay.includes(s)) return false;
+        }
+        return true;
+      });
+
+      if(!filtered.length){
+        list.innerHTML = `<p class="p">Nenhum anúncio com esses filtros. Tente outra cidade ou limpe a pesquisa.</p>`;
+        return;
+      }
+
+      filtered.forEach(a=>{
+        const el = document.createElement("div");
+        el.style.border = "1px solid var(--stroke)";
+        el.style.background = "#0b1220";
+        el.style.borderRadius = "14px";
+        el.style.padding = "12px";
+        el.innerHTML = `
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <div>
+              <b style="font-size:14px">${a.nick} • ${a.age}</b>
+              <div class="p" style="margin-top:2px">${a.city} • ${a.goal}</div>
+              <div style="margin-top:8px">${a.text}</div>
+              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+                ${(a.tags||[]).map(t=>`<span class="badge">#${t}</span>`).join("")}
+              </div>
+            </div>
+            <button class="btn primary" style="max-width:180px" data-nick="${a.nick}">Chamar</button>
+          </div>
+        `;
+        el.querySelector("button").addEventListener("click", ()=>{
+          // abre chat (ainda visual)
+          location.href = `chat.html?nick=${encodeURIComponent(a.nick)}`;
+        });
+        list.appendChild(el);
+      });
+    }
+
+    filterCity.addEventListener("change", render);
+    filterGoal.addEventListener("change", render);
+    search.addEventListener("input", render);
+
+    btnPost.addEventListener("click", ()=>{
+      alert("Publicar anúncio entra na próxima etapa (com login + banco).");
+    });
+
+    render();
+  </script>
+</body>
+</html>
